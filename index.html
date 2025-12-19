@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="tr">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>TNES v1.0.0 | Türkiye Nükleer Etki Simülasyonu</title>
+		<link rel="icon" href="icon.svg" />
+		<script src="https://cdn.tailwindcss.com"></script>
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+		/>
+		<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+		<link
+			href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400;700&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body class="antialiased">
+		<div class="radar-line"></div>
+
+		<div
+			class="fixed top-0 left-0 w-full z-[2000] p-4 flex justify-between items-start pointer-events-none"
+		>
+			<div class="pointer-events-auto">
+				<div class="glass p-3 rounded-lg border-l-4 border-red-600">
+					<h1
+						class="text-xl font-bold tracking-tighter flex items-center gap-2"
+					>
+						<svg
+							class="w-6 h-6 text-red-500 animate-pulse"
+							fill="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z" />
+						</svg>
+						TNES <span class="text-red-500">v1.0.0</span>
+					</h1>
+					<p class="text-[10px] mono text-slate-500 uppercase tracking-widest">
+						Türkiye Nükleer Etki Simülasyonu
+					</p>
+				</div>
+			</div>
+
+			<div class="flex gap-4 pointer-events-auto">
+				<div
+					class="glass p-3 rounded-lg text-center min-w-[100px] defcon-card"
+					id="defconPanel"
+				>
+					<p class="text-[9px] text-slate-400 font-bold mb-1">DURUM SEVİYESİ</p>
+					<p class="text-xl font-black text-green-500" id="defconMetin">
+						DEFCON 5
+					</p>
+				</div>
+				<div class="glass p-3 rounded-lg text-right">
+					<p id="canliSaat" class="text-xl font-bold mono">00:00:00</p>
+					<p class="text-[9px] text-slate-500 uppercase tracking-widest">
+						Operasyonel Zaman
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<main class="relative">
+			<div id="harita"></div>
+
+			<div class="fixed left-4 top-24 z-[2000] w-80 space-y-4">
+				<div class="glass p-5 rounded-xl border-t border-white/10">
+					<h2
+						class="text-xs font-bold text-red-400 mb-4 flex items-center gap-2"
+					>
+						<span class="w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
+						HEDEFLEME SİSTEMİ
+					</h2>
+
+					<div class="space-y-4">
+						<div>
+							<label class="text-[10px] text-slate-400 uppercase font-bold"
+								>Öncelikli Hedefler</label
+							>
+							<select
+								id="sehirSecici"
+								class="w-full bg-slate-900/50 border border-white/10 p-2 mt-1 rounded text-sm outline-none focus:border-red-500 transition-colors"
+							>
+								<option value="39.9334,32.8597">Ankara</option>
+								<option value="41.0082,28.9784">İstanbul</option>
+								<option value="38.4237,27.1428">İzmir</option>
+								<option value="37.0000,35.3213">Adana</option>
+								<option value="40.7667,29.9167">Kocaeli</option>
+							</select>
+						</div>
+
+						<div>
+							<div class="flex justify-between items-end mb-1">
+								<label class="text-[10px] text-slate-400 uppercase font-bold"
+									>Verim (Payload)</label
+								>
+								<span
+									id="gucGosterge"
+									class="text-lg font-bold text-red-500 italic"
+									>350 kt</span
+								>
+							</div>
+							<input
+								type="range"
+								id="gucKaydirici"
+								min="1"
+								max="50000"
+								value="350"
+								class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-red-600"
+							/>
+							<div class="flex justify-between text-[9px] text-slate-500 mt-1">
+								<span>1 KT</span>
+								<span>TSAR (50 MT)</span>
+							</div>
+						</div>
+
+						<div>
+							<div class="flex justify-between items-end mb-1">
+								<label class="text-[10px] text-slate-400 uppercase font-bold"
+									>Rüzgar Vektörü</label
+								>
+								<span id="ruzgarGosterge" class="text-xs text-blue-400"
+									>45° / KB</span
+								>
+							</div>
+							<input
+								type="range"
+								id="ruzgarKaydirici"
+								min="0"
+								max="360"
+								value="45"
+								class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600"
+							/>
+						</div>
+
+						<button
+							id="atesleButonu"
+							class="w-full py-4 rounded-lg bomba-atesleme font-black uppercase tracking-widest text-sm pulse-red mt-2"
+						>
+							Analiz
+						</button>
+					</div>
+				</div>
+
+				<div class="glass p-4 rounded-xl max-h-40 overflow-hidden relative">
+					<div class="absolute top-0 right-0 p-2">
+						<span
+							class="w-1 h-1 bg-green-500 rounded-full inline-block animate-pulse"
+						></span>
+					</div>
+					<h3 class="text-[9px] font-bold text-slate-500 mb-2 uppercase">
+						TNES İletişim Hattı
+					</h3>
+					<div
+						id="logAkisi"
+						class="text-[9px] mono text-green-500 space-y-1 overflow-y-auto h-28 pr-2"
+					>
+						<div>> BAŞLATMA SIRASI TAMAMLANDI...</div>
+						<div>> TNES UYDU BAĞLANTISI KURULDU...</div>
+						<div>> TARGET İÇİN BEKLİYORUZ...</div>
+					</div>
+				</div>
+			</div>
+
+			<div
+				id="analizPaneli"
+				class="fixed right-4 top-24 z-[2000] w-96 space-y-4 opacity-0 pointer-events-none transition-all duration-700 translate-x-10"
+			>
+				<div class="glass p-5 rounded-xl">
+					<h2
+						class="text-xs font-bold text-slate-400 mb-4 border-b border-white/5 pb-2 italic"
+					>
+						// HASAR_PROJEKSİYONU
+					</h2>
+
+					<div class="grid grid-cols-2 gap-4 mb-6">
+						<div class="bg-black/30 p-3 rounded border-l-2 border-yellow-500">
+							<p class="text-[9px] text-slate-500 uppercase">Kritik Yarıçap</p>
+							<p id="v_kritik" class="text-lg font-bold">0.00 km</p>
+						</div>
+						<div class="bg-black/30 p-3 rounded border-l-2 border-red-500">
+							<p class="text-[9px] text-slate-500 uppercase">Tahmini Kayıp</p>
+							<p id="v_kayip" class="text-lg font-bold">0</p>
+						</div>
+					</div>
+
+					<div class="h-48 mb-4">
+						<canvas id="hasarGrafigi"></canvas>
+					</div>
+
+					<div id="etkiDetaylari" class="space-y-2"></div>
+				</div>
+
+				<div class="glass p-4 rounded-xl border-l-4 border-orange-500">
+					<h3 class="text-[10px] font-bold text-orange-400 mb-1 uppercase">
+						UYARI: Radyoaktif Serpinti
+					</h3>
+					<p class="text-[9px] text-slate-400 leading-relaxed">
+						Mevcut rüzgar vektörü verilerine göre serpinti bulutu seçili yönde
+						<span id="serpintiMenzil" class="text-white font-bold">0km</span>
+						boyunca etkili olacaktır. Tahliye protokollerini başlatın.
+					</p>
+				</div>
+			</div>
+		</main>
+
+		<div
+			class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[2000] glass px-6 py-2 rounded-full border border-red-500/20 text-[10px] text-slate-500 mono flex items-center gap-4"
+		>
+			<span>LAT: <span id="imlecLat" class="text-slate-300">0.00</span></span>
+			<span>LNG: <span id="imlecLng" class="text-slate-300">0.00</span></span>
+			<span class="w-1 h-1 bg-slate-700 rounded-full"></span>
+			<span class="text-red-900 font-bold animate-pulse"
+				>Bu sistem askeri veya resmi bir savunma aracı değildir.</span
+			>
+		</div>
+
+		<script src="script.js"></script>
+	</body>
+</html>

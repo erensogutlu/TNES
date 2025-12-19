@@ -1,0 +1,86 @@
+:root {
+	--neon-red: #ff003c;
+	--neon-blue: #00f2ff;
+	--panel-bg: rgba(7, 10, 25, 0.85);
+	--border-glow: 0 0 15px rgba(255, 0, 60, 0.3);
+}
+
+body {
+	background: #02040a;
+	color: #e2e8f0;
+	font-family: "Space Grotesk", sans-serif;
+	overflow-x: hidden;
+}
+
+.mono {
+	font-family: "JetBrains Mono", monospace;
+}
+
+#harita {
+	height: 100vh;
+	width: 100%;
+	background: #05070a;
+	filter: brightness(0.7) contrast(1.2) saturate(0.8);
+}
+
+.glass {
+	background: var(--panel-bg);
+	backdrop-filter: blur(16px);
+	border: 1px solid rgba(255, 255, 255, 0.05);
+	box-shadow: var(--border-glow);
+}
+
+.defcon-card {
+	transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bomba-atesleme {
+	background: linear-gradient(45deg, #7c1a1a, #ff003c);
+	transition: all 0.3s ease;
+	text-shadow: 0 0 10px rgba(255, 0, 60, 0.8);
+}
+
+.bomba-atesleme:hover {
+	filter: brightness(1.2);
+	box-shadow: 0 0 30px rgba(255, 0, 60, 0.5);
+	letter-spacing: 2px;
+}
+
+::-webkit-scrollbar {
+	width: 4px;
+}
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+::-webkit-scrollbar-thumb {
+	background: #334155;
+	border-radius: 10px;
+}
+
+.radar-line {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(transparent 50%, rgba(0, 242, 255, 0.02) 50%);
+	background-size: 100% 4px;
+	pointer-events: none;
+	z-index: 1000;
+}
+
+.pulse-red {
+	animation: pulse-red-anim 2s infinite;
+}
+
+@keyframes pulse-red-anim {
+	0% {
+		box-shadow: 0 0 0 0 rgba(255, 0, 60, 0.4);
+	}
+	70% {
+		box-shadow: 0 0 0 20px rgba(255, 0, 60, 0);
+	}
+	100% {
+		box-shadow: 0 0 0 0 rgba(255, 0, 60, 0);
+	}
+}
